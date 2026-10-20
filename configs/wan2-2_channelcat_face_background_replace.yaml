@@ -1,0 +1,49 @@
+# Channel-concat + FACE-ADAPTER variant.
+# - input video  -> CHANNEL concat (channel-concat editing style)
+# - reference     -> in-context token concat (unchanged)
+# - expression    -> Wan-Animate face adapter (motion_encoder FROZEN/pretrained,
+#                    face_encoder + face_adapter trained from scratch), per-person mask
+# - trained from scratch (no PAI Actor), 10000 steps
+experiment_project: 'Background_Replace'
+experiment_name: 'wan2-2_channelcat_face_bg_replace'
+model_id: 'Wan-AI/Wan2.2-TI2V-5B-Diffusers'
+output_root: 'outputs/wan2-2_channelcat_face_bg_replace'
+use_drop_text: True
+use_lora: True
+use_collaborative_position_encoding: True   # ignored by the channel-concat transformer
+
+# face expression injection
+face:
+  motion_encoder_path: 'checkpoints/motion_encoder.pth'
+  inject_every: 5                           # FaceAdapter at every 5th DiT block (30//5 = 6 adapters)
+  max_persons: 0                            # 0 = no cap; multi-person via per-person masks (single = N=1)
+
+training:
+  resume_path: ~
+  batch_size: 1
+  max_steps: 10000
+  warmup_steps: 10
+  rank: 80
+  learning_rate: 5e-5
+  weight_decay: 1e-2
+  save_val_interval_steps: 500
+  accumulate_grad_batches: 1
+  gradient_clip_val: ~
+  precision: "bf16-mixed"
+  accelerator: "auto"
+  strategy: 'auto'
+  gradient_checkpointing: True
+  benchmark: False
+
+dataset:
+  data_jsonl: 'examples/demo_infer.jsonl'   # inference manifest (see examples/)
+  is_one2three: True
+  height: 1056
+  width: 1920
+  resize_long: 1920
+  sample_n_frames: 97
+  fps: 24
+  num_workers: 8
+  shuffle: True
+  drop_last: True
+  pin_memory: True
