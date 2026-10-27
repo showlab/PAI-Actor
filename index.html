@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PAI-Actor: Cinematic Multi-Character Replacement in Dynamic Scenes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;700&display=swap');
+        body { font-family: "Google Sans", "Open Sans", sans-serif; font-weight: 300; background-color: #fff; margin: 0; padding: 0; }
+        .content { width: 1000px; padding: 25px 50px; margin: 25px auto; background-color: white; box-shadow: 0px 0px 10px #999; border-radius: 15px; }
+        h1 { text-align: center; font-size: 35px; font-weight: 300; }
+        h2 { font-size: 30px; font-weight: 300; text-align: center; }
+        h3 { font-size: 22px; font-weight: 400; text-align: center; color: #444; }
+        p { line-height: 25px; text-align: justify; }
+        a, a:visited { color: #224b8d; font-weight: 300; }
+        #authors { text-align: center; margin-bottom: 20px; font-size: 20px; }
+        #authors a { margin: 0 10px; }
+        .summary-img { display: block; margin-left: auto; margin-right: auto; }
+        .btn-row { text-align: center; margin-top: 20px; }
+        .btn-row a {
+            display: inline-flex; align-items: center; vertical-align: middle;
+            padding: 6px 18px; margin: 5px; background: #333; color: white;
+            border-radius: 20px; text-decoration: none; font-size: 15px;
+        }
+        .btn-row a:hover { background: #555; color: white; }
+        .btn-row a i { margin-right: 6px; font-size: 18px; }
+        .btn-row a.disabled { background: #888; cursor: not-allowed; pointer-events: none; opacity: 0.7; }
+        video { width: 100%; border-radius: 8px; }
+        .feature-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 15px 0; }
+        .feature-table th { background: #e6e6e6; padding: 8px; text-align: center; font-size: 13px; }
+        .feature-table td { padding: 6px 8px; text-align: center; border-bottom: 1px solid #eee; }
+        .feature-table tr.ours { background: #d0e8ff; font-weight: 700; }
+        .check { color: #2e7d32; }
+        .cross { color: #c62828; }
+        .two-col { display: flex; gap: 15px; align-items: flex-start; }
+        .two-col > div { flex: 1; }
+        .two-col img { width: 100%; }
+        .quant-wrap { overflow-x: auto; margin: 12px 0; }
+        .quant-table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
+        .quant-table th, .quant-table td { padding: 4px 6px; text-align: center; border-bottom: 1px solid #eee; white-space: nowrap; }
+        .quant-table thead th { background: #e6e6e6; font-size: 12px; }
+        .quant-table thead tr.sub th { background: #f2f2f2; font-weight: 400; color: #555; font-size: 11px; }
+        .quant-table td.method, .quant-table th.method { text-align: left; }
+        .quant-table tr.teacher { background: #d0e8ff; font-weight: 700; }
+        .quant-table tr.student { background: #dcf5d8; font-weight: 700; }
+        .quant-table td .na { color: #bbb; }
+        @media (max-width: 1100px) { .content { width: 90%; padding: 20px; } }
+        @media (max-width: 700px) { .two-col { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<div class="content">
+    <h1><strong>PAI-Actor: Cinematic Multi-Character Replacement in Dynamic Scenes</strong></h1>
+
+    <p id="authors">
+        <span>Bangxun Tang<sup>1,2,*</sup>, Heyuan Gao<sup>1,3,*</sup>, Yiren Song<sup>1,4,*</sup>, Guian Fang<sup>1,4</sup>, Zijian He<sup>1</sup>, Jie Yang<sup>1</sup>, Mike Zheng Shou<sup>4,&dagger;</sup></span>
+        <br>
+        <span style="font-size:16px;"><sup>1</sup>Utopai Studios&nbsp;&nbsp;&nbsp;<sup>2</sup>University of California, Irvine&nbsp;&nbsp;&nbsp;<sup>3</sup>Nanyang Technological University&nbsp;&nbsp;&nbsp;<sup>4</sup>Show Lab, National University of Singapore</span>
+        <br>
+        <span style="font-size:15px;">* Equal contribution&nbsp;&nbsp;&nbsp;&dagger; Corresponding author</span>
+        <br><br>
+        <span style="font-size:18px; color:#cc0000; font-weight:bold;">
+            NeurIPS 2026
+        </span>
+    </p>
+
+    <div class="btn-row">
+        <a href="https://arxiv.org/abs/2609.05918"><i class="fas fa-file-pdf"></i> Paper</a>
+        <a href="https://github.com/showlab/PAI-Actor"><i class="fas fa-code"></i> Code</a>
+    </div>
+
+    <div style="margin-top: 25px;">
+        <video autoplay loop muted playsinline>
+            <source src="static/teaser.mp4" type="video/mp4">
+        </video>
+        <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+            Given a source video and a reference image per character, PAI-Actor replaces characters in cinematic dynamic scenes while preserving background, camera motion, and pose-accurate reenactment at 1080P resolution.
+        </p>
+    </div>
+</div>
+
+<div class="content">
+    <h2>Abstract</h2>
+    <p>
+        We present PAI-Actor, a cinematic multi-character animation framework for character replacement in dynamic movie scenes. Unlike conventional animation systems that mainly drive a single static image or a single subject, our goal is to replace and animate multiple characters within real video clips while preserving the original scene dynamics, camera motion, and background content. This setting is particularly challenging because the generated characters must remain consistent with the source performance in motion and interaction, while also matching the surrounding background in lighting, shadow, composition, and overall cinematic appearance. To address this, we formulate multi-character animation as a structure-guided human recovery problem and build a movie-driven training pipeline from high-quality film data. Furthermore, to support practical cinematic production, we introduce a bidirectional-to-autoregressive distillation framework: we first train a bidirectional diffusion transformer for high-quality short-clip generation at 1080P resolution, and then distill it into an autoregressive video-to-video model for efficient inference and longer video generation. Experiments show that PAI-Actor enables high-fidelity multi-character animation with strong scene consistency, cinematic visual quality, and efficient long-form generation.
+    </p>
+</div>
+
+<div class="content">
+    <h2>Feature Comparison</h2>
+    <table class="feature-table">
+        <tr>
+            <th>Feature</th>
+            <th>Wan-Animate</th>
+            <th>MultiAnimate</th>
+            <th>SCAIL</th>
+            <th>DOMO</th>
+            <th>Viggle</th>
+            <th>Kling O1</th>
+            <th>MoCha</th>
+            <th>Ours</th>
+        </tr>
+        <tr>
+            <td>1080P</td>
+            <td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td>
+            <td class="check">&#10003;</td>
+        </tr>
+        <tr>
+            <td>Multi-Character</td>
+            <td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td>
+            <td class="check">&#10003;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+        </tr>
+        <tr>
+            <td>Long-Video Output (&gt;10s)</td>
+            <td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td>
+            <td class="check">&#10003;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+        </tr>
+        <tr>
+            <td>Pose-Driven Control</td>
+            <td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td>
+            <td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+        </tr>
+        <tr>
+            <td>Background Preservation</td>
+            <td class="check">&#10003;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td>
+            <td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td>
+            <td class="check">&#10003;</td>
+        </tr>
+        <tr class="ours">
+            <td>Occlusion Handling</td>
+            <td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td>
+            <td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+        </tr>
+    </table>
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Feature comparison between PAI-Actor and existing character-replacement approaches. PAI-Actor is the only method that jointly supports 1080P resolution, multi-character animation, long-form generation, pose-driven control, background preservation, and complex occlusion handling.
+    </p>
+</div>
+
+<div class="content">
+    <h2>Method</h2>
+    <img class="summary-img" src="static/method.png" style="width:100%" alt="Method overview">
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Overview of the PAI-Actor framework. We cast multi-character animation as a structure-guided human recovery problem: original performers are masked out from movie clips, structured pose and face signals are rendered on the masked regions, and a diffusion transformer recovers the complete characters in the original video space. A bidirectional-to-autoregressive distillation strategy first trains a bidirectional teacher for 1080P short-clip quality, then distills it into an autoregressive video-to-video generator for efficient long-form synthesis.
+    </p>
+</div>
+
+<div class="content">
+    <h2>Generation Results</h2>
+    <video autoplay loop muted playsinline>
+        <source src="static/showcase.mp4" type="video/mp4">
+    </video>
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Cinematic multi-character replacement results across diverse movie scenes. Generated characters preserve source-video motion, interaction, and camera dynamics while matching the surrounding scene lighting and composition.
+    </p>
+</div>
+
+<div class="content">
+    <h2>Comparison with Baselines</h2>
+    <video autoplay loop muted playsinline>
+        <source src="static/compare.mp4" type="video/mp4">
+    </video>
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Qualitative comparison against existing character-replacement systems. Baselines struggle with identity drift, background distortion, occlusion failures, and resolution degradation. PAI-Actor produces clean, identity-consistent, occlusion-aware replacements that preserve the original cinematic scene.
+    </p>
+</div>
+
+<div class="content">
+    <h2>Ablation Study</h2>
+    <video autoplay loop muted playsinline>
+        <source src="static/ablation_16x9.mp4?v=97" type="video/mp4">
+    </video>
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Ablation on key components of PAI-Actor, including the structure-guided recovery formulation, movie-driven training data, and the bidirectional-to-autoregressive distillation. Each component contributes to final motion fidelity, identity preservation, and scene consistency.
+    </p>
+</div>
+
+<div class="content">
+    <h2>More Animation Results</h2>
+    <video autoplay loop muted playsinline>
+        <source src="static/supp_animation.mp4" type="video/mp4">
+    </video>
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Additional multi-character animation results across diverse movie scenes. Each example compares PAI-Actor against baselines and the ground-truth video, for both single- and multi-character settings.
+    </p>
+</div>
+
+<div class="content">
+    <h2>User Study</h2>
+    <img class="summary-img" src="static/userstudy_4metrics.png" style="width:100%" alt="User preference across four perceptual metrics">
+    <p style="text-align: center; font-size: 14px; color: #666; margin-top: 8px;">
+        Human evaluation across 15 users covering Background Consistency, FG-BG Fusion, Illumination Harmony, and Character Consistency. PAI-Actor receives the highest vote share over open-source and commercial baselines in both single- and multi-character settings.
+    </p>
+</div>
+
+<div class="content">
+    <h2>Quantitative Results</h2>
+
+    <h3>Character-Animation Subset</h3>
+    <div class="quant-wrap">
+    <table class="quant-table">
+        <thead>
+            <tr>
+                <th class="method" rowspan="2">Method</th>
+                <th colspan="2">MSE&darr;<br><span style="font-weight:400;font-size:10px;">(&times;10<sup>-3</sup>)</span></th>
+                <th colspan="2">SSIM&uarr;</th>
+                <th colspan="2">LPIPS&darr;</th>
+                <th colspan="2">Pose-Dist&darr;<br><span style="font-weight:400;font-size:10px;">(&times;10<sup>-2</sup>)</span></th>
+                <th colspan="2">Pose-Match&uarr;</th>
+                <th colspan="2">Motion&uarr;</th>
+                <th colspan="2">BG Cons.&uarr;</th>
+                <th colspan="2">FG-BG&uarr;</th>
+                <th colspan="2">Illum.&uarr;</th>
+                <th colspan="2">Char.&uarr;</th>
+            </tr>
+            <tr class="sub">
+                <th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th>
+                <th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td class="method">Domo</td><td>17.0</td><td>19.1</td><td>0.647</td><td>0.623</td><td>0.335</td><td>0.360</td><td>4.65</td><td>4.09</td><td>0.674</td><td>0.857</td><td>0.732</td><td>0.791</td><td>9.52</td><td>9.02</td><td>7.63</td><td>7.28</td><td>7.72</td><td>7.85</td><td>5.00</td><td>3.91</td></tr>
+            <tr><td class="method">Viggle</td><td>12.8</td><td>16.6</td><td>0.718</td><td>0.700</td><td>0.263</td><td>0.312</td><td>4.66</td><td>5.18</td><td>0.637</td><td>0.710</td><td>0.627</td><td>0.714</td><td>8.98</td><td>9.15</td><td>5.35</td><td>4.85</td><td>6.10</td><td>5.83</td><td>3.73</td><td>2.63</td></tr>
+            <tr><td class="method">Kling O1</td><td>7.88</td><td>8.85</td><td>0.712</td><td>0.733</td><td>0.211</td><td>0.227</td><td>3.12</td><td>2.79</td><td>0.807</td><td>0.910</td><td>0.716</td><td>0.759</td><td>8.29</td><td>8.36</td><td>8.43</td><td>8.46</td><td>7.84</td><td>7.97</td><td>5.04</td><td>5.34</td></tr>
+            <tr><td class="method">Wan-Animate<sup>*</sup></td><td>5.30</td><td>9.94</td><td>0.832</td><td>0.766</td><td>0.170</td><td>0.251</td><td>2.65</td><td>3.21</td><td>0.833</td><td>0.898</td><td>0.796</td><td>0.814</td><td>8.88</td><td>9.30</td><td>8.41</td><td>8.31</td><td><strong>8.28</strong></td><td>8.05</td><td>5.00</td><td>4.44</td></tr>
+            <tr><td class="method">SCAIL</td><td>52.9</td><td>47.6</td><td>0.852</td><td>0.779</td><td>0.161</td><td>0.217</td><td>4.74</td><td>4.00</td><td>0.755</td><td>0.835</td><td>0.749</td><td>0.736</td><td>1.77</td><td>1.60</td><td>5.20</td><td>5.25</td><td>6.23</td><td>6.66</td><td>4.98</td><td>4.28</td></tr>
+            <tr><td class="method">MultiAnimate</td><td>26.2</td><td>32.6</td><td><strong>0.905</strong></td><td><strong>0.868</strong></td><td>0.126</td><td>0.170</td><td>3.78</td><td>3.06</td><td>0.766</td><td>0.891</td><td>0.524</td><td>0.518</td><td>1.67</td><td>1.33</td><td>4.90</td><td>4.35</td><td>6.56</td><td>6.19</td><td>5.46</td><td>5.23</td></tr>
+            <tr><td class="method">VACE</td><td>3.22</td><td>4.77</td><td>0.833</td><td>0.836</td><td>0.169</td><td>0.188</td><td>2.63</td><td>2.63</td><td>0.862</td><td>0.907</td><td>0.751</td><td>0.774</td><td>9.77</td><td>9.75</td><td>8.50</td><td>8.31</td><td>8.05</td><td>7.95</td><td>4.94</td><td>5.16</td></tr>
+            <tr class="teacher"><td class="method">Ours-Bidir (teacher)</td><td><strong>1.80</strong></td><td><strong>2.85</strong></td><td>0.877</td><td>0.864</td><td><strong>0.102</strong></td><td><strong>0.120</strong></td><td><strong>2.20</strong></td><td><strong>2.15</strong></td><td><strong>0.879</strong></td><td><strong>0.935</strong></td><td><strong>0.833</strong></td><td><strong>0.862</strong></td><td><strong>9.83</strong></td><td><strong>9.98</strong></td><td><strong>8.65</strong></td><td><strong>9.05</strong></td><td>8.04</td><td><strong>8.66</strong></td><td><strong>5.72</strong></td><td><strong>6.10</strong></td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p style="text-align: center; font-size: 13px; color: #666; margin-top: 4px;">
+        Quantitative comparison on the Character-Animation Subset under single-character (S) and multi-character (M) settings. The last four metrics are LLM-based perceptual scores. <sup>*</sup>Wan-Animate is applied one character at a time for the multi-character setting. Best per column in <strong>bold</strong>.
+    </p>
+
+    <h3 style="margin-top:30px;">Character-Replacement Subset (LLM-based)</h3>
+    <div class="quant-wrap">
+    <table class="quant-table">
+        <thead>
+            <tr>
+                <th class="method" rowspan="2">Method</th>
+                <th colspan="2">BG Cons.&uarr;</th>
+                <th colspan="2">FG-BG Fusion&uarr;</th>
+                <th colspan="2">Illum. Harmony&uarr;</th>
+                <th colspan="2">Char. Cons.&uarr;</th>
+            </tr>
+            <tr class="sub"><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th></tr>
+        </thead>
+        <tbody>
+            <tr><td class="method">Domo</td><td>9.33</td><td>8.78</td><td>7.22</td><td>7.30</td><td>6.94</td><td>7.35</td><td>6.39</td><td>6.09</td></tr>
+            <tr><td class="method">Viggle</td><td>8.24</td><td>8.46</td><td>5.04</td><td>3.59</td><td>6.17</td><td>5.54</td><td>5.09</td><td>3.91</td></tr>
+            <tr><td class="method">Kling O1</td><td>8.41</td><td>8.81</td><td>8.08</td><td>8.20</td><td>7.43</td><td>8.10</td><td>6.53</td><td>6.94</td></tr>
+            <tr><td class="method">Wan-Animate<sup>*</sup></td><td>8.80</td><td>8.84</td><td>8.16</td><td>8.17</td><td><strong>7.93</strong></td><td>7.47</td><td>5.76</td><td>4.34</td></tr>
+            <tr><td class="method">MoCha</td><td>8.71</td><td>9.25</td><td><strong>8.19</strong></td><td>8.21</td><td>7.43</td><td><strong>8.29</strong></td><td>5.85</td><td>6.00</td></tr>
+            <tr class="teacher"><td class="method">Ours-Bidir (teacher)</td><td><strong>9.72</strong></td><td><strong>9.85</strong></td><td>8.18</td><td><strong>8.80</strong></td><td>7.79</td><td>8.06</td><td><strong>6.76</strong></td><td><strong>7.03</strong></td></tr>
+            <tr class="student"><td class="method">Ours-Causal (final student)</td><td>8.49</td><td>8.51</td><td>7.05</td><td>7.47</td><td>7.38</td><td>7.64</td><td>4.94</td><td>4.77</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p style="text-align: center; font-size: 13px; color: #666; margin-top: 4px;">
+        LLM-based evaluation (averaged GPT-5.1 &amp; Gemini 3 Pro) on the Character-Replacement Subset, which has no ground truth and is scored perceptually. Best per column in <strong>bold</strong>.
+    </p>
+
+    <h3 style="margin-top:30px;">Long-Video Subset</h3>
+    <div class="quant-wrap">
+    <table class="quant-table">
+        <thead>
+            <tr>
+                <th class="method" rowspan="2">Method</th>
+                <th colspan="2">MSE&darr;<br><span style="font-weight:400;font-size:10px;">(&times;10<sup>-3</sup>)</span></th>
+                <th colspan="2">SSIM&uarr;</th>
+                <th colspan="2">LPIPS&darr;</th>
+                <th colspan="2">Pose-Dist&darr;<br><span style="font-weight:400;font-size:10px;">(&times;10<sup>-2</sup>)</span></th>
+                <th colspan="2">Pose-Match&uarr;</th>
+                <th colspan="2">Motion&uarr;</th>
+                <th colspan="2">BG Cons.&uarr;</th>
+                <th colspan="2">FG-BG&uarr;</th>
+                <th colspan="2">Illum.&uarr;</th>
+                <th colspan="2">Char.&uarr;</th>
+            </tr>
+            <tr class="sub">
+                <th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th>
+                <th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="student"><td class="method">Ours-Causal (final student)</td><td>4.77</td><td>4.48</td><td>0.880</td><td>0.860</td><td>0.118</td><td>0.129</td><td>4.90</td><td>1.56</td><td>0.857</td><td>0.988</td><td>0.856</td><td>0.903</td><td>9.88</td><td>9.43</td><td>6.25</td><td>6.22</td><td>7.25</td><td>7.97</td><td>5.38</td><td>4.33</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p style="text-align: center; font-size: 13px; color: #666; margin-top: 4px;">
+        Long-Video results of the final causal (autoregressive) student on the Long-Video Subset. The distilled student sustains cinematic quality on long sequences that the bidirectional teacher cannot generate directly.
+    </p>
+
+    <h3 style="margin-top:30px;">Ablation Study</h3>
+    <div class="quant-wrap">
+    <table class="quant-table">
+        <thead>
+            <tr>
+                <th class="method" rowspan="2">Method</th>
+                <th colspan="2">MSE&darr;<br><span style="font-weight:400;font-size:10px;">(&times;10<sup>-3</sup>)</span></th>
+                <th colspan="2">SSIM&uarr;</th>
+                <th colspan="2">LPIPS&darr;</th>
+                <th colspan="2">Pose-Dist&darr;<br><span style="font-weight:400;font-size:10px;">(&times;10<sup>-2</sup>)</span></th>
+                <th colspan="2">Pose-Match&uarr;</th>
+                <th colspan="2">Motion&uarr;</th>
+            </tr>
+            <tr class="sub">
+                <th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th><th>S</th><th>M</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td class="method">w/o Dilation</td><td>2.36</td><td>3.14</td><td>0.830</td><td>0.834</td><td>0.117</td><td>0.130</td><td>2.48</td><td>2.29</td><td>0.862</td><td>0.914</td><td>0.809</td><td>0.847</td></tr>
+            <tr><td class="method">w/o Co-Posed Ref.</td><td>6.24</td><td>14.9</td><td>0.812</td><td>0.765</td><td>0.164</td><td>0.218</td><td>2.99</td><td>3.39</td><td>0.804</td><td>0.848</td><td>0.816</td><td>0.824</td></tr>
+            <tr><td class="method">Ours-Causal w/o self-forcing</td><td>2.76</td><td>3.84</td><td><strong>0.878</strong></td><td>0.860</td><td>0.121</td><td>0.139</td><td>2.73</td><td>2.35</td><td>0.819</td><td>0.917</td><td>0.826</td><td>0.842</td></tr>
+            <tr class="student"><td class="method">Ours-Causal, final (self-forcing)</td><td>2.50</td><td>3.43</td><td>0.838</td><td>0.836</td><td>0.137</td><td>0.157</td><td>3.00</td><td>2.61</td><td>0.818</td><td>0.885</td><td>0.804</td><td>0.831</td></tr>
+            <tr class="teacher"><td class="method">Ours-Bidir (full)</td><td><strong>1.80</strong></td><td><strong>2.85</strong></td><td>0.877</td><td><strong>0.864</strong></td><td><strong>0.102</strong></td><td><strong>0.120</strong></td><td><strong>2.20</strong></td><td><strong>2.15</strong></td><td><strong>0.879</strong></td><td><strong>0.935</strong></td><td><strong>0.833</strong></td><td><strong>0.862</strong></td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p style="text-align: center; font-size: 13px; color: #666; margin-top: 4px;">
+        Ablation on the Character-Animation Subset under single-character (S) and multi-character (M) settings. The final self-forcing causal student trades a small amount of reconstruction accuracy for autoregressive scalability. Best per column in <strong>bold</strong>.
+    </p>
+</div>
+
+</body>
+</html>
