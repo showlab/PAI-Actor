@@ -1,6 +1,6 @@
 # PAI-Actor: Cinematic Multi-Character Replacement in Dynamic Scenes
 
-**Project page:** https://gaohy63601-droid.github.io/PAI_Actor_Home/  
+**Project page:** https://showlab.github.io/PAI-Actor/  
 **Model weights:** https://huggingface.co/ghyggg/PAI-Actor-release
 
 This repository provides the **inference code** for PAI-Actor.
